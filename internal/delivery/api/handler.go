@@ -1,0 +1,36 @@
+package api
+
+import (
+	"time"
+
+	"github.com/bllooop/nameservice/internal/usecase"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+)
+
+type Handler struct {
+	Usecases *usecase.Usecase
+	Now      func() time.Time
+}
+
+func NewHandler(usecases *usecase.Usecase) *Handler {
+	return &Handler{Usecases: usecases, Now: func() time.Time { return time.Now() }}
+}
+func NewHandlerWithFixedTime(usecases *usecase.Usecase, fixedTime time.Time) *Handler {
+	return &Handler{
+		Usecases: usecases,
+		Now:      func() time.Time { return fixedTime },
+	}
+}
+
+func (h *Handler) InitRoutes() *gin.Engine {
+	router := gin.New()
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+	}))
+
+	return router
+}
