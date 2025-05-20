@@ -42,6 +42,7 @@ func (h *Handler) GetPeople(c *gin.Context) {
 	patronymic := c.Query("patronymic")
 	page := c.DefaultQuery("page", "1")
 	limit := c.DefaultQuery("limit", "10")
+
 	pageInt, err := strconv.Atoi(page)
 	if err != nil || pageInt < 1 {
 		pageInt = 1
@@ -69,7 +70,12 @@ func (h *Handler) GetPeople(c *gin.Context) {
 		Limit:       limitInt,
 		Page:        pageInt,
 	}
-	applog.Logger.Debug().Msgf("Успешно прочитаны параметры из запроса %v", filters)
+	applog.Logger.Debug().Msgf(
+		"Успешно прочитаны параметры из запроса %s, %s, %s, %s, %s, %d, %d, %d, %d",
+		strVal(filters.Name), strVal(filters.Surname), strVal(filters.Gender),
+		strVal(filters.Nationality), strVal(filters.Patronymic),
+		intVal(filters.AgeMin), intVal(filters.AgeMax), filters.Limit, filters.Page,
+	)
 	result, err := h.Usecases.GetPeople(filters)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg("")
@@ -248,4 +254,18 @@ func getApiData(input *domain.Person) error {
 		input.Nationality = &max.CountryID
 	}
 	return nil
+}
+
+func strVal(s *string) string {
+	if s == nil {
+		return "<nil>"
+	}
+	return *s
+}
+
+func intVal(i *int) int {
+	if i == nil {
+		return 0
+	}
+	return *i
 }

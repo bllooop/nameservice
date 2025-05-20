@@ -46,34 +46,41 @@ func (r *PersonPostgres) GetPeople(filters domain.FilterParams) ([]domain.Person
 func buildConditions(input domain.FilterParams) ([]string, []interface{}) {
 	var conditions []string
 	var args []interface{}
-
-	if input.Name != nil {
-		conditions = append(conditions, "name == $1")
+	argId := 1
+	if input.Name != nil && *input.Name != "" {
+		conditions = append(conditions, fmt.Sprintf("name=$%d", argId))
 		args = append(args, input.Name)
+		argId++
 	}
-	if input.Surname != nil {
-		conditions = append(conditions, "surname == $1")
-		args = append(args, input.Name)
+	if input.Surname != nil && *input.Surname != "" {
+		conditions = append(conditions, fmt.Sprintf("surname=$%d", argId))
+		args = append(args, input.Surname)
+		argId++
 	}
-	if input.Patronymic != nil {
-		conditions = append(conditions, "patronymic == $1")
+	if input.Patronymic != nil && *input.Patronymic != "" {
+		conditions = append(conditions, fmt.Sprintf("patronymic=$%d", argId))
 		args = append(args, input.Patronymic)
+		argId++
 	}
-	if input.Gender != nil {
-		conditions = append(conditions, "gender == $1")
+	if input.Gender != nil && *input.Gender != "" {
+		conditions = append(conditions, fmt.Sprintf("gender=$%d", argId))
 		args = append(args, input.Gender)
+		argId++
 	}
-	if input.Nationality != nil {
-		conditions = append(conditions, "gender == $1")
+	if input.Nationality != nil && *input.Nationality != "" {
+		conditions = append(conditions, fmt.Sprintf("nationality=$%d", argId))
 		args = append(args, input.Nationality)
+		argId++
 	}
-	if input.AgeMin != IntPointer(-1) {
-		conditions = append(conditions, "age >= $2")
+	if input.AgeMin != nil && *input.AgeMin >= 0 {
+		conditions = append(conditions, fmt.Sprintf("age >= $%d", argId))
 		args = append(args, input.AgeMin)
+		argId++
 	}
-	if input.AgeMax != IntPointer(-1) {
-		conditions = append(conditions, "age <= $2")
+	if input.AgeMax != nil && *input.AgeMax >= 0 {
+		conditions = append(conditions, fmt.Sprintf("age <= $%d", argId))
 		args = append(args, input.AgeMax)
+		argId++
 	}
 	return conditions, args
 }

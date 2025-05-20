@@ -13,35 +13,10 @@ import (
 	applog "github.com/bllooop/nameservice/internal/log"
 	"github.com/bllooop/nameservice/internal/repository"
 	"github.com/bllooop/nameservice/internal/usecase"
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 )
 
-func Run() error {
-	applog.Logger.Debug().Msg("Инициализация сервера...")
-
-	if err := initConfig(); err != nil {
-		applog.Logger.Error().Err(err).Msg("")
-		//applog.Logger.Fatal().Msg("Возникла ошибка загрузки конфига")
-		return fmt.Errorf("ошибка загрузки конфига: %w", err)
-
-	}
-	if err := godotenv.Load(); err != nil {
-		applog.Logger.Error().Err(err).Msg("")
-		//applog.Logger.Fatal().Msg("Возникла ошибка с env")
-		return fmt.Errorf("ошибка загрузки .env: %w", err)
-
-	}
-	applog.Logger.Debug().Msg("Переменные окружения успешно загружены")
-	cfg := repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DBname:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-	}
-
+func Run(cfg repository.Config) error {
 	dbpool, err := repository.NewPostgresDB(cfg)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg("Не удалось установить соединение с базой данных")
