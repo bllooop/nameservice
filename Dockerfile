@@ -2,7 +2,7 @@ FROM golang:1.24
 
 WORKDIR /app
 RUN go version
-ENV $GOPATH=/
+ENV GOPATH=/
 
 COPY . .
 

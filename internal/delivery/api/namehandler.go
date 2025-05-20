@@ -97,11 +97,11 @@ func (h *Handler) CreatePerson(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, "Неверный запрос")
 		return
 	}
-	applog.Logger.Debug().Msgf("Успешно прочитаны данные из запроса  %s, %s, %s", input.Name, input.Surname, input.Patronymic)
+	applog.Logger.Debug().Msgf("Успешно прочитаны данные из запроса  %s, %s, %v", input.Name, input.Surname, input.Patronymic)
 	err := getApiData(&input)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
-		newErrorResponse(c, http.StatusBadRequest, "Требуется запрос POST")
+		newErrorResponse(c, http.StatusBadRequest, "Ошибка запроса в API")
 		return
 	}
 	result, err := h.Usecases.Person.CreatePerson(input)
@@ -119,12 +119,12 @@ func (h *Handler) CreatePerson(c *gin.Context) {
 
 func (h *Handler) DeletePerson(c *gin.Context) {
 	applog.Logger.Info().Msg("Получен запрос на удаление фио по идентификатору")
-	if c.Request.Method != http.MethodPost {
-		applog.Logger.Error().Msg("Требуется запрос POST")
-		newErrorResponse(c, http.StatusBadRequest, "Требуется запрос POST")
+	if c.Request.Method != http.MethodDelete {
+		applog.Logger.Error().Msg("Требуется запрос DELETE")
+		newErrorResponse(c, http.StatusBadRequest, "Требуется запрос DELETE")
 		return
 	}
-	nameId, err := strconv.Atoi(c.Param("nameId"))
+	nameId, err := strconv.Atoi(c.Query("nameId"))
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg("")
 		newErrorResponse(c, http.StatusInternalServerError, "Некорректный ввод ID")
@@ -163,8 +163,8 @@ func (h *Handler) UpdateName(c *gin.Context) {
 		return
 	}
 	applog.Logger.Debug().
-		Interface("binded_song", input).
-		Msg("Успешное обработка JSON со структурой")
+		Interface("binded_person", input).
+		Msg("Успешная обработка JSON в структуру")
 
 	res, err := h.Usecases.Person.UpdateName(nameId, input)
 	if err != nil {
@@ -196,6 +196,7 @@ func getApiData(input *domain.Person) error {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		return fmt.Errorf("Ошибка обработки ответа Agify")
 	}
+	applog.Logger.Debug().Msgf("Успешно получен возраст %v", &agify.Age)
 
 	input.Age = &agify.Age
 
@@ -211,10 +212,11 @@ func getApiData(input *domain.Person) error {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		return fmt.Errorf("genderize вернул ошибку")
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&genderize); err != nil {
+	if err := json.NewDecoder(genderResp.Body).Decode(&genderize); err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		return fmt.Errorf("Ошибка обработки ответа Genderize")
 	}
+	applog.Logger.Debug().Msgf("Успешно получен пол %v", &genderize.Gender)
 
 	input.Gender = &genderize.Gender
 	nationalUrl := fmt.Sprintf("https://api.nationalize.io/?name=%s", input.Name)
@@ -229,7 +231,7 @@ func getApiData(input *domain.Person) error {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		return fmt.Errorf("Nationalize вернул ошибку")
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&nationalizeData); err != nil {
+	if err := json.NewDecoder(nationalResp.Body).Decode(&nationalizeData); err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		return fmt.Errorf("Ошибка обработки ответа nationalize")
 	}
@@ -241,6 +243,8 @@ func getApiData(input *domain.Person) error {
 				max = c
 			}
 		}
+		applog.Logger.Debug().Msgf("Успешно получена национальность %v", &max.CountryID)
+
 		input.Nationality = &max.CountryID
 	}
 	return nil

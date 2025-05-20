@@ -79,10 +79,10 @@ func buildConditions(input domain.FilterParams) ([]string, []interface{}) {
 }
 func (r *PersonPostgres) CreatePerson(input domain.Person) (*domain.Person, error) {
 	var result domain.Person
-	query := fmt.Sprintf(`INSERT INTO %s (name,surname, patronymic, age, gender, nationality) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,registrationdate,city`, peopleListTable)
+	query := fmt.Sprintf(`INSERT INTO %s (name,surname, patronymic, age, gender, nationality) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id,name,surname, patronymic, age, gender, nationality`, peopleListTable)
 	row := r.db.QueryRowx(query, input.Name, input.Surname, input.Patronymic, input.Age, input.Gender, input.Nationality)
 	applog.Logger.Debug().Str("query", query).Msg("Выполнение запроса сохранения сущности человека в БД")
-	if err := row.Scan(&result.ID); err != nil {
+	if err := row.Scan(&result.ID, &result.Name, &result.Surname, &result.Patronymic, &result.Age, &result.Gender, &result.Nationality); err != nil {
 		return &domain.Person{}, err
 	}
 	applog.Logger.Debug().Any("person response", result).Msg("Успешно добавлена обогащенная сущность человека в БД")
@@ -132,7 +132,7 @@ func (r *PersonPostgres) UpdateName(nameId int, input domain.UpdatePerson) (*dom
 		argId++
 	}
 	setQuery := strings.Join(setValues, ", ")
-	query := fmt.Sprintf("UPDATE %s SET %s WHERE id=$%d RETURNING name,surname, patronymic, age, gender, nationality", peopleListTable, setQuery, argId)
+	query := fmt.Sprintf("UPDATE %s SET %s WHERE id=$%d RETURNING id, name,surname, patronymic, age, gender, nationality", peopleListTable, setQuery, argId)
 	applog.Logger.Debug().
 		Str("query", query).
 		Msgf("Выполняем запрос обновления следующих параметров: %v", args)
