@@ -15,16 +15,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Run() {
+func Run(cfg repository.Config) {
 
-	dbpool, err := repository.NewPostgresDB(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DBname:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-	})
+	dbpool, err := repository.NewPostgresDB(cfg)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg("Не удалось установить соединение с базой данных")
 		applog.Logger.Fatal().Msg("Произошла ошибка с базой данных")
@@ -33,14 +26,7 @@ func Run() {
 
 	migratePath := "./migrations"
 	applog.Logger.Debug().Msgf("Running database migrations from path: %s", migratePath)
-	if err = repository.RunMigrate(repository.Config{
-		Host:     viper.GetString("db.host"),
-		Port:     viper.GetString("db.port"),
-		Username: viper.GetString("db.username"),
-		Password: os.Getenv("DB_PASSWORD"),
-		DBname:   viper.GetString("db.dbname"),
-		SSLMode:  viper.GetString("db.sslmode"),
-	}, migratePath); err != nil {
+	if err = repository.RunMigrate(cfg, migratePath); err != nil {
 		applog.Logger.Error().Err(err).Msg("")
 		applog.Logger.Fatal().Msg("Возникла ошибка при переносе")
 	}

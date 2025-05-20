@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  nameservice:
+    build: 
+      context: .
+      dockerfile: Dockerfile  
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    networks:
+      - name_network
+    depends_on:
+      - db
+    environment:
+      - DB_PASSWORD=54321
+      
+  db:
+    container_name: db
+    restart: always
+    image: postgres:latest
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=54321
+    ports:
+      - 5436:5432
+    networks:
+      - name_network
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U postgres -d postgres'"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  pgdata:
+
+networks:
+  name_network:
+    name: name_network
+    driver: bridge

@@ -27,10 +27,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.New()
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 	}))
-
+	router.POST("/create_person", h.CreatePerson)
+	router.DELETE("/delete_person", h.DeletePerson)
+	router.PATCH("/update_person", h.UpdateName)
+	router.GET("/get_people", h.GetPeople)
 	return router
 }

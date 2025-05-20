@@ -1,16 +1,23 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/bllooop/nameservice/internal/domain"
+	"github.com/jmoiron/sqlx"
+)
 
-type Name interface {
+type Person interface {
+	CreatePerson(input domain.Person) (*domain.Person, error)
+	DeleteName(nameId int) error
+	UpdateName(nameId int, input domain.UpdatePerson) (*domain.Person, error)
+	GetPeople(filters domain.FilterParams) ([]domain.Person, error)
 }
 
 type Repository struct {
-	Name
+	Person
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Name: NewNamePostgres(db),
+		Person: NewPersonPostgres(db),
 	}
 }

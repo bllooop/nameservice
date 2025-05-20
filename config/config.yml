@@ -1,5 +1,4 @@
 port: "8080"
-portGrpc: ":3000"
 db:
     host: "db" 
     port: "5432"    
