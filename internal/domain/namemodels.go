@@ -1,7 +1,7 @@
 package domain
 
 type Person struct {
-	ID          int64   `json:"id"`
+	ID          int64   `json:"-"`
 	Name        string  `json:"name"`
 	Surname     string  `json:"surname"`
 	Patronymic  *string `json:"patronymic,omitempty"`
@@ -10,6 +10,17 @@ type Person struct {
 	Nationality *string `json:"nationality,omitempty"`
 }
 
+type InputPerson struct {
+	ID         int64   `json:"-"`
+	Name       string  `json:"name"`
+	Surname    string  `json:"surname"`
+	Patronymic *string `json:"patronymic,omitempty"`
+}
+
+type PersonResponse struct {
+	Status string `json:"status" example:"ok"`
+	Data   Person `json:"data"`
+}
 type FilterParams struct {
 	Name        *string
 	Surname     *string
@@ -23,7 +34,7 @@ type FilterParams struct {
 }
 
 type UpdatePerson struct {
-	ID          *int64  `json:"id"`
+	ID          *int64  `json:"-"`
 	Name        *string `json:"name"`
 	Surname     *string `json:"surname"`
 	Patronymic  *string `json:"patronymic,omitempty"`

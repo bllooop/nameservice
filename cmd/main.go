@@ -14,6 +14,13 @@ import (
 	"github.com/spf13/viper"
 )
 
+// @title Name API
+// @version 1.0
+// @description API сервис по работе с фио и другими характеристиками
+
+// @host localhost:8080
+// @BasePath /
+
 func main() {
 	applog.InitLogger(os.Stdout, zerolog.DebugLevel)
 	applog.Logger.Debug().Msg("Инициализация сервера...")

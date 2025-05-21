@@ -26,6 +26,23 @@ var nationalizeData struct {
 	} `json:"country"`
 }
 
+// @Summary Get list of people
+// @Tags people
+// @Description Получение списка людей из бд с применением фильтров и пагинаций. Параметры, передающиеся в адресе запроса, представлены ниже, можно заполнять любое желаемое количество. Для возраста представлено два параметра, ограничиващих выборку.
+// @ID get-people
+// @Param name query string false "Имя"
+// @Param surname query string false "Фамилия"
+// @Param patronymic query string false "Отчество"
+// @Param gender query string false "Пол"
+// @Param nationality query string false "Национальность"
+// @Param age_min query int false "Минимальный возраст"
+// @Param age_max query int false "Максимальный возраст"
+// @Param page query int false "Страница"
+// @Param limit query int false "Лимит"
+// @Produce  json
+// @Success 200 {object} domain.PersonResponse
+// @Failure 400,404,500 {object} api.ErrorResponse
+// @Router /get_people [get]
 func (h *Handler) GetPeople(c *gin.Context) {
 	applog.Logger.Info().Msg("Получен запрос на получение данны о ПВЗ")
 	if c.Request.Method != http.MethodGet {
@@ -85,11 +102,21 @@ func (h *Handler) GetPeople(c *gin.Context) {
 
 	applog.Logger.Info().Msg("Получен ответ на запрос сущностей")
 	c.JSON(http.StatusOK, map[string]any{
-		"message": "Люди",
-		"content": result,
+		"status": "ok",
+		"data":   result,
 	})
 }
 
+// @Summary Create person
+// @Tags people
+// @Description Создание сущности человека в БД при использовании переданных в запросе данных. Структура тела запроса представлена ниже, поле "Отчество" необязательно.
+// @ID create-person
+// @Accept json
+// @Produce  json
+// @Param input body domain.InputPerson true "list info"
+// @Success 200 {object} domain.PersonResponse
+// @Failure 400,404,500 {object} api.ErrorResponse
+// @Router /create_person [post]
 func (h *Handler) CreatePerson(c *gin.Context) {
 	applog.Logger.Info().Msg("Получен запрос на запись сущности в БД")
 	if c.Request.Method != http.MethodPost {
@@ -97,20 +124,24 @@ func (h *Handler) CreatePerson(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, "Неверный запрос")
 		return
 	}
-	var input domain.Person
+	var input domain.InputPerson
 	if err := c.ShouldBindJSON(&input); err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		newErrorResponse(c, http.StatusBadRequest, "Неверный запрос")
 		return
 	}
 	applog.Logger.Debug().Msgf("Успешно прочитаны данные из запроса  %s, %s, %v", input.Name, input.Surname, input.Patronymic)
-	err := getApiData(&input)
+	var addedInput domain.Person
+	addedInput.Name = input.Name
+	addedInput.Surname = input.Surname
+	addedInput.Patronymic = input.Patronymic
+	err := getApiData(&addedInput)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		newErrorResponse(c, http.StatusBadRequest, "Ошибка запроса в API")
 		return
 	}
-	result, err := h.Usecases.Person.CreatePerson(input)
+	result, err := h.Usecases.Person.CreatePerson(addedInput)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg("")
 		newErrorResponse(c, http.StatusInternalServerError, "Ошибка выполнения запроса "+err.Error())
@@ -123,6 +154,15 @@ func (h *Handler) CreatePerson(c *gin.Context) {
 	})
 }
 
+// @Summary Delete person by ID
+// @Tags people
+// @Description Удаление сущности человека из БД по указнному ID. ID передается в адресе запроса.
+// @ID delete-person
+// @Param nameId query int true "ID"
+// @Produce  json
+// @Success 200 {string} message
+// @Failure 400,404,500 {object} api.ErrorResponse
+// @Router /delete_person [delete]
 func (h *Handler) DeletePerson(c *gin.Context) {
 	applog.Logger.Info().Msg("Получен запрос на удаление фио по идентификатору")
 	if c.Request.Method != http.MethodDelete {
@@ -150,13 +190,24 @@ func (h *Handler) DeletePerson(c *gin.Context) {
 	})
 }
 
+// @Summary Update person by ID
+// @Tags people
+// @Description Обновление сущности человека из БД по указнному ID, применяя данные из запроса. Структура тела запроса представлена ниже, можно заполнить желаемое количество полей.
+// @ID update-person
+// @Param nameId query int false "ID"
+// @Accept json
+// @Produce  json
+// @Param input body domain.UpdatePerson true "list info"
+// @Success 200 {object} domain.PersonResponse
+// @Failure 400,404,500 {object} api.ErrorResponse
+// @Router /update_person [patch]
 func (h *Handler) UpdateName(c *gin.Context) {
 	applog.Logger.Info().Msg("Получен запрос на измнение сущности фио")
-	if c.Request.Method != http.MethodPut {
-		newErrorResponse(c, http.StatusBadRequest, "Требуется запрос PUT")
+	if c.Request.Method != http.MethodPatch {
+		newErrorResponse(c, http.StatusBadRequest, "Требуется запрос PATCH")
 		return
 	}
-	nameId, err := strconv.Atoi(c.Param("nameId"))
+	nameId, err := strconv.Atoi(c.Query("nameId"))
 	if err != nil {
 		newErrorResponse(c, http.StatusBadRequest, "недопустимое значение идентификатора")
 		return

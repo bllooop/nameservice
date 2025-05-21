@@ -1,0 +1,237 @@
+basePath: /
+definitions:
+  api.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  domain.InputPerson:
+    properties:
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  domain.Person:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      nationality:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  domain.PersonResponse:
+    properties:
+      data:
+        $ref: '#/definitions/domain.Person'
+      status:
+        example: ok
+        type: string
+    type: object
+  domain.UpdatePerson:
+    properties:
+      age:
+        type: integer
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      nationality:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API сервис по работе с фио и другими характеристиками
+  title: Name API
+  version: "1.0"
+paths:
+  /create_person:
+    post:
+      consumes:
+      - application/json
+      description: создание сущности человека в БД при использовании переданных в
+        запросе данных
+      operationId: create-person
+      parameters:
+      - description: list info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.InputPerson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Create person
+      tags:
+      - people
+  /delete_person:
+    delete:
+      description: удаление сущности человека из БД по указнному ID
+      operationId: delete-person
+      parameters:
+      - description: ID
+        in: query
+        name: nameId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Delete person by ID
+      tags:
+      - people
+  /get_people:
+    get:
+      description: получение списка людей из бд с применением фильтров и пагинаций
+      operationId: get-people
+      parameters:
+      - description: Имя
+        in: query
+        name: name
+        type: string
+      - description: Фамилия
+        in: query
+        name: surname
+        type: string
+      - description: Отчество
+        in: query
+        name: patronymic
+        type: string
+      - description: Пол
+        in: query
+        name: gender
+        type: string
+      - description: Национальность
+        in: query
+        name: nationality
+        type: string
+      - description: Минимальный возраст
+        in: query
+        name: age_min
+        type: integer
+      - description: Максимальный возраст
+        in: query
+        name: age_max
+        type: integer
+      - description: Страница
+        in: query
+        name: page
+        type: integer
+      - description: Лимит
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Get list of people
+      tags:
+      - people
+  /update_person:
+    patch:
+      consumes:
+      - application/json
+      description: Обновление сущности человека из БД по указнному ID, применяя данные
+        из запроса. Ниже представлен объект в котором заполняются поля для изменений.
+      operationId: update-person
+      parameters:
+      - description: ID
+        in: query
+        name: nameId
+        type: integer
+      - description: list info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdatePerson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.PersonResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Update person by ID
+      tags:
+      - people
+swagger: "2.0"
