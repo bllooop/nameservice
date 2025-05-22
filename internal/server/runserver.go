@@ -45,7 +45,7 @@ func Run(cfg repository.Config) error {
 	//http serv
 	go func() {
 		applog.Logger.Info().Msg("Запуск сервера...")
-		if err := srv.StartHTTP("8080", handler.InitRoutes()); err != nil && err != http.ErrServerClosed {
+		if err := srv.StartHTTP(cfg.ServerPort, handler.InitRoutes()); err != nil && err != http.ErrServerClosed {
 			applog.Logger.Error().Err(err).Msg("При запуске HTTP сервера произошла ошибка")
 			//applog.Logger.Fatal().Msg("При запуске HTTP сервера произошла ошибка")
 			os.Exit(1)

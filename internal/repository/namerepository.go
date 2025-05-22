@@ -18,13 +18,7 @@ func NewPersonPostgres(db *sqlx.DB) *PersonPostgres {
 		db: db,
 	}
 }
-func (r *PersonPostgres) beginTx() (*sqlx.Tx, error) {
-	tx, err := r.db.Beginx()
-	if err != nil {
-		return nil, err
-	}
-	return tx, nil
-}
+
 func (r *PersonPostgres) GetPeople(filters domain.FilterParams) ([]domain.Person, error) {
 	conditions, args := buildConditions(filters)
 	offset := (filters.Page - 1) * filters.Limit
@@ -33,7 +27,7 @@ func (r *PersonPostgres) GetPeople(filters domain.FilterParams) ([]domain.Person
 	if len(conditions) > 0 {
 		query += " WHERE " + strings.Join(conditions, " AND ")
 	}
-	query += fmt.Sprintf(" LIMIT $%d OFFSET $%d", len(args)-1, len(args))
+	query += fmt.Sprintf(" ORDER BY  %s  %s LIMIT $%d OFFSET $%d", *filters.SortBy, *filters.OrderBy, len(args)-1, len(args))
 	var people []domain.Person
 	err := r.db.Select(&people, query, args...)
 	if err != nil {

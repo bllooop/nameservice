@@ -39,13 +39,15 @@
 ## Пользование сервисом
 ### Для получения списка людей с фильтрацией по всем полям и пагинацией
 ```
-curl --location --request GET 'http://localhost:8080/get_people?name={name}&surname={surname}&patronymic={patronymic}&nationality=&{RU}gender={gender}&age_min={0}&age_max={100}&page=1&limit=1&' \
+curl --location --request GET 'http://localhost:8080/get_people?name={name}&surname={surname}&patronymic={patronymic}&nationality=&{RU}gender={gender}&age_min={0}&age_max={100}&page=1&limit=1&sort={sortColumn}&order={ASC or DESC}' \
 --header 'Content-Type: application/json' \
 --data ''
 ```
 Данные в запросе указаны для примера. Для каждого параметра нужно ввести желаемый. 
 Вместо page нужно ввести желаемое количество страниц с данными. Если поле оставить пустым, по умолчанию будет значение 1. 
 Вместо limit нужно ввести желаемое количество данных на странице. Если поле оставить пустым, по умолчанию будет значение 10. 
+Вместо sort название параметра по которому будет сортироваться список, а вместо order направление - по убыванию или возрастанию. 
+Если оставить их пустыми, по умолчанию будет сортировка по id по возрастанию.
 После успешного запроса будет выведен список сохранненых в базу данных людей.
 
 #### Для добавления человека необходимо ввести запрос
@@ -61,7 +63,7 @@ curl --location  --request POST 'http://localhost:8080/create_person' \
 В полях для добавления нужно ввести имя и фамилию. По желанию, можно ввести и отчество. По этим данным будут выполняться запросы в 3 API получение данных о возрасте, поле и стране происхождения.
 После успешного запроса будет выведен идентификатор и сущность сохранненого человека. 
 
-#### Для обновления песни необходимо ввести запрос
+#### Для обновления сущности человека необходимо ввести запрос
 ```
 curl --location --request PATCH 'http://localhost:8080/update_person?nameId={nameId}' \
 --header 'Content-Type: application/json' \
@@ -76,7 +78,7 @@ curl --location --request PATCH 'http://localhost:8080/update_person?nameId={nam
 ```
 Для исправления можно ввести любое нужное количество полей в указанном порядке. В адресе запроса вместо id указать идентификатор человека для изменения.
 
-#### Для удаления песни необходимо ввести запрос
+#### Для удаления сущности человека необходимо ввести запрос
 ```
 curl --location --request DELETE 'http://localhost:8080/delete_person?nameId={nameId}' \
 --header 'Content-Type: application/json' \

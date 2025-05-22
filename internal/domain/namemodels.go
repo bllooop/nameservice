@@ -29,6 +29,8 @@ type FilterParams struct {
 	Patronymic  *string
 	AgeMin      *int
 	AgeMax      *int
+	SortBy      *string
+	OrderBy     *string
 	Limit       int
 	Page        int
 }

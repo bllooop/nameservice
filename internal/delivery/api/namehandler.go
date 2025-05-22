@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/bllooop/nameservice/internal/domain"
@@ -39,6 +40,8 @@ var nationalizeData struct {
 // @Param age_max query int false "Максимальный возраст"
 // @Param page query int false "Страница"
 // @Param limit query int false "Лимит"
+// @Param sort query string false "Параметр сортировки"
+// @Param order query string false "Направление сортировки"
 // @Produce  json
 // @Success 200 {object} domain.PersonResponse
 // @Failure 400,404,500 {object} api.ErrorResponse
@@ -59,6 +62,8 @@ func (h *Handler) GetPeople(c *gin.Context) {
 	patronymic := c.Query("patronymic")
 	page := c.DefaultQuery("page", "1")
 	limit := c.DefaultQuery("limit", "10")
+	sortOrder := c.DefaultQuery("order", "asc")
+	sortCol := c.DefaultQuery("sort", "id")
 
 	pageInt, err := strconv.Atoi(page)
 	if err != nil || pageInt < 1 {
@@ -86,10 +91,13 @@ func (h *Handler) GetPeople(c *gin.Context) {
 		AgeMax:      &ageMaxInt,
 		Limit:       limitInt,
 		Page:        pageInt,
+		SortBy:      &sortCol,
+		OrderBy:     &sortOrder,
 	}
 	applog.Logger.Debug().Msgf(
-		"Успешно прочитаны параметры из запроса %s, %s, %s, %s, %s, %d, %d, %d, %d",
+		"Успешно прочитаны параметры из запроса %s, %s, %s, %s, %s, %s, %s,%d, %d, %d, %d",
 		strVal(filters.Name), strVal(filters.Surname), strVal(filters.Gender),
+		strVal(filters.SortBy), strVal(filters.OrderBy),
 		strVal(filters.Nationality), strVal(filters.Patronymic),
 		intVal(filters.AgeMin), intVal(filters.AgeMax), filters.Limit, filters.Page,
 	)
@@ -237,7 +245,8 @@ func (h *Handler) UpdateName(c *gin.Context) {
 }
 
 func getApiData(input *domain.Person) error {
-	ageUrl := fmt.Sprintf("https://api.agify.io/?name=%s", input.Name)
+	ageUrl := os.Getenv("AGEURL") + input.Name
+	//ageUrl := fmt.Sprintf("https://api.agify.io/?name=%s", input.Name)
 	resp, err := http.Get(ageUrl)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
@@ -253,11 +262,11 @@ func getApiData(input *domain.Person) error {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		return fmt.Errorf("Ошибка обработки ответа Agify")
 	}
-	applog.Logger.Debug().Msgf("Успешно получен возраст %v", &agify.Age)
+	applog.Logger.Debug().Msgf("Успешно получен возраст %v", agify.Age)
 
 	input.Age = &agify.Age
-
-	genderURL := fmt.Sprintf("https://api.genderize.io/?name=%s", input.Name)
+	genderURL := os.Getenv("GENDERURL") + input.Name
+	//genderURL := fmt.Sprintf("https://api.genderize.io/?name=%s", input.Name)
 	genderResp, err := http.Get(genderURL)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
@@ -273,10 +282,11 @@ func getApiData(input *domain.Person) error {
 		applog.Logger.Error().Err(err).Msg(err.Error())
 		return fmt.Errorf("Ошибка обработки ответа Genderize")
 	}
-	applog.Logger.Debug().Msgf("Успешно получен пол %v", &genderize.Gender)
+	applog.Logger.Debug().Msgf("Успешно получен пол %v", genderize.Gender)
 
 	input.Gender = &genderize.Gender
-	nationalUrl := fmt.Sprintf("https://api.nationalize.io/?name=%s", input.Name)
+	nationalUrl := os.Getenv("NATIONALURL") + input.Name
+	//nationalUrl := fmt.Sprintf("https://api.nationalize.io/?name=%s", input.Name)
 	nationalResp, err := http.Get(nationalUrl)
 	if err != nil {
 		applog.Logger.Error().Err(err).Msg(err.Error())
@@ -300,7 +310,7 @@ func getApiData(input *domain.Person) error {
 				max = c
 			}
 		}
-		applog.Logger.Debug().Msgf("Успешно получена национальность %v", &max.CountryID)
+		applog.Logger.Debug().Msgf("Успешно получена национальность %v", max.CountryID)
 
 		input.Nationality = &max.CountryID
 	}

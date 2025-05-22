@@ -20,8 +20,6 @@ definitions:
         type: integer
       gender:
         type: string
-      id:
-        type: integer
       name:
         type: string
       nationality:
@@ -45,8 +43,6 @@ definitions:
         type: integer
       gender:
         type: string
-      id:
-        type: integer
       name:
         type: string
       nationality:
@@ -67,8 +63,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: создание сущности человека в БД при использовании переданных в
-        запросе данных
+      description: Создание сущности человека в БД при использовании переданных в
+        запросе данных. Структура тела запроса представлена ниже, поле "Отчество"
+        необязательно.
       operationId: create-person
       parameters:
       - description: list info
@@ -101,7 +98,8 @@ paths:
       - people
   /delete_person:
     delete:
-      description: удаление сущности человека из БД по указнному ID
+      description: Удаление сущности человека из БД по указнному ID. ID передается
+        в адресе запроса.
       operationId: delete-person
       parameters:
       - description: ID
@@ -133,7 +131,10 @@ paths:
       - people
   /get_people:
     get:
-      description: получение списка людей из бд с применением фильтров и пагинаций
+      description: Получение списка людей из бд с применением фильтров и пагинаций.
+        Параметры, передающиеся в адресе запроса, представлены ниже, можно заполнять
+        любое желаемое количество. Для возраста представлено два параметра, ограничиващих
+        выборку.
       operationId: get-people
       parameters:
       - description: Имя
@@ -172,6 +173,14 @@ paths:
         in: query
         name: limit
         type: integer
+      - description: Параметр сортировки
+        in: query
+        name: sort
+        type: string
+      - description: Направление сортировки
+        in: query
+        name: order
+        type: string
       produces:
       - application/json
       responses:
@@ -199,7 +208,8 @@ paths:
       consumes:
       - application/json
       description: Обновление сущности человека из БД по указнному ID, применяя данные
-        из запроса. Ниже представлен объект в котором заполняются поля для изменений.
+        из запроса. Структура тела запроса представлена ниже, можно заполнить желаемое
+        количество полей.
       operationId: update-person
       parameters:
       - description: ID

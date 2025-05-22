@@ -17,7 +17,7 @@ const docTemplate = `{
     "paths": {
         "/create_person": {
             "post": {
-                "description": "создание сущности человека в БД при использовании переданных в запросе данных",
+                "description": "Создание сущности человека в БД при использовании переданных в запросе данных. Структура тела запроса представлена ниже, поле \"Отчество\" необязательно.",
                 "consumes": [
                     "application/json"
                 ],
@@ -70,7 +70,7 @@ const docTemplate = `{
         },
         "/delete_person": {
             "delete": {
-                "description": "удаление сущности человека из БД по указнному ID",
+                "description": "Удаление сущности человека из БД по указнному ID. ID передается в адресе запроса.",
                 "produces": [
                     "application/json"
                 ],
@@ -118,7 +118,7 @@ const docTemplate = `{
         },
         "/get_people": {
             "get": {
-                "description": "получение списка людей из бд с применением фильтров и пагинаций",
+                "description": "Получение списка людей из бд с применением фильтров и пагинаций. Параметры, передающиеся в адресе запроса, представлены ниже, можно заполнять любое желаемое количество. Для возраста представлено два параметра, ограничиващих выборку.",
                 "produces": [
                     "application/json"
                 ],
@@ -181,6 +181,18 @@ const docTemplate = `{
                         "description": "Лимит",
                         "name": "limit",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Параметр сортировки",
+                        "name": "sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Направление сортировки",
+                        "name": "order",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -213,7 +225,7 @@ const docTemplate = `{
         },
         "/update_person": {
             "patch": {
-                "description": "Обновление сущности человека из БД по указнному ID, применяя данные из запроса. Ниже представлен объект в котором заполняются поля для изменений.",
+                "description": "Обновление сущности человека из БД по указнному ID, применяя данные из запроса. Структура тела запроса представлена ниже, можно заполнить желаемое количество полей.",
                 "consumes": [
                     "application/json"
                 ],
@@ -303,9 +315,6 @@ const docTemplate = `{
                 "gender": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -340,9 +349,6 @@ const docTemplate = `{
                 },
                 "gender": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "name": {
                     "type": "string"
